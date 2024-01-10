@@ -21,7 +21,7 @@ void application_entry_point() {
     uavcanSetNodeName(node_name);
 
     while(true) {
-        LedPeriphery::toggle(LedColor::BLUE_COLOR);
+        LedPeriphery::toggle();
         uavcanSpinOnce();
     }
 }

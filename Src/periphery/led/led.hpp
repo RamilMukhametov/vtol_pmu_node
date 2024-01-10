@@ -10,17 +10,10 @@
 extern "C" {
 #endif
 
-enum class LedColor {
-    RED_COLOR,
-    GREEN_COLOR,
-    BLUE_COLOR,
-    COLORS_AMOUNT,
-};
-
 class LedPeriphery {
 public:
     static void reset();
-    static void toggle(LedColor led_color);
+    static void toggle();
 };
 
 #ifdef __cplusplus

@@ -6,6 +6,5 @@
 void LedPeriphery::reset() {
 }
 
-void LedPeriphery::toggle(LedColor led_color) {
-    (void)led_color;
+void LedPeriphery::toggle() {
 }

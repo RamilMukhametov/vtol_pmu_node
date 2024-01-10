@@ -45,7 +45,7 @@ else()
     set(stm32CubeMxGeneratedFiles
         ${coreSources}
         ${driversSources}
-        ${stm32cubeMxProjectPath}/startup_stm32f103xb.s
+        ${stm32cubeMxProjectPath}/Core/Startup/startup_stm32f103tbux.s
     )
     set(stm32CubeMxHeaders
         ${stm32cubeMxProjectPath}/Core/Inc
@@ -111,7 +111,7 @@ else()
     )
 
     target_link_options(${EXECUTABLE} PRIVATE
-        -T${stm32cubeMxProjectPath}/STM32F103T8UX_FLASH.ld
+        -T${stm32cubeMxProjectPath}/STM32F103TBUX_FLASH.ld
         -mcpu=cortex-m3
         -mthumb
         --specs=nosys.specs
