@@ -8,6 +8,7 @@
 #include "string_params.hpp"
 #include "storage.h"
 #include "periphery/led/led.hpp"
+#include "modules/pmu.hpp"
 
 void application_entry_point() {
     paramsInit(static_cast<uint8_t>(IntParamsIndexes::INTEGER_PARAMS_AMOUNT), NUM_OF_STR_PARAMS);
@@ -20,8 +21,12 @@ void application_entry_point() {
     uavcanInitApplication(node_id);
     uavcanSetNodeName(node_name);
 
+    VtolPmu pmu;
+    pmu.init();
+
     while(true) {
         LedPeriphery::toggle();
         uavcanSpinOnce();
+        pmu.process();
     }
 }

@@ -16,6 +16,8 @@ set(applicationSourceCode
     ${libparamsSrc}
     ${DRONECAN_SOURCES}
     ${ROOT_DIR}/Src/dronecan_application/application.cpp
+    ${ROOT_DIR}/Src/dronecan_application/modules/buzzer.cpp
+    ${ROOT_DIR}/Src/dronecan_application/modules/pmu.cpp
     ${ROOT_DIR}/Src/dronecan_application/params.cpp
 )
 set(applicationHeaders
