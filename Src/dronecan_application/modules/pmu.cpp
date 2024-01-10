@@ -12,16 +12,6 @@
 #include "periphery/adc/adc.hpp"
 
 
-// #define ADC_VIN_RANK                0
-// #define ADC_GATE_2_RANK             1
-// #define ADC_CRNT_RANK               2
-// #define ADC_GATE_3_RANK             3
-// #define ADC_GATE_4_RANK             4
-// #define ADC_DEV_TEMPERATURE_RANK    5
-// #define ADC_VERSION_RANK            6
-// #define ADC_CHANNELS_AMOUNT         7
-
-
 VtolPmu::VtolPmu() {
 
 }

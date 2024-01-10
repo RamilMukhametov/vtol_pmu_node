@@ -11,6 +11,6 @@ IntegerDesc_t integer_desc_pool[] = {
 IntegerParamValue_t integer_values_pool[sizeof(integer_desc_pool) / sizeof(IntegerDesc_t)];
 
 StringDesc_t __attribute__((weak)) string_desc_pool[NUM_OF_STR_PARAMS] = {
-    {"system.name", "arl.fuel_tank", IMMUTABLE},
+    {"system.name", "arl.pmu", IMMUTABLE},
 };
 StringParamValue_t string_values_pool[sizeof(string_desc_pool) / sizeof(StringDesc_t)];
