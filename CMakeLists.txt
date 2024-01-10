@@ -62,6 +62,7 @@ add_executable(${EXECUTABLE}
     ${stm32CubeMxGeneratedFiles}
     ${libsSourceCode}
     ${applicationSourceCode}
+    ${ROOT_DIR}/Src/platform/${APP_PLATFORM}/adc.cpp
     ${ROOT_DIR}/Src/platform/${APP_PLATFORM}/pwm.cpp
     ${ROOT_DIR}/Src/platform/${APP_PLATFORM}/led.cpp
     ${ROOT_DIR}/Src/platform/${APP_PLATFORM}/platform_specific.cpp

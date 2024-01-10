@@ -8,6 +8,7 @@
 #include "string_params.hpp"
 #include "storage.h"
 #include "periphery/led/led.hpp"
+#include "periphery/adc/adc.hpp"
 #include "modules/pmu.hpp"
 
 void application_entry_point() {
@@ -18,6 +19,8 @@ void application_entry_point() {
     auto node_name = (const char*)paramsGetStringValue(static_cast<uint8_t>(IntParamsIndexes::INTEGER_PARAMS_AMOUNT));
 
     LedPeriphery::reset();
+    AdcPeriphery::init();
+
     uavcanInitApplication(node_id);
     uavcanSetNodeName(node_name);
 

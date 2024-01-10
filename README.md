@@ -15,3 +15,5 @@
 ### 3. Application interface
 
 [BatteryInfo](https://dronecan.github.io/Specification/7._List_of_standard_data_types/#batteryinfo)
+
+<img src="Assets/battery_info.png" alt="drawing">
