@@ -12,15 +12,21 @@
 #include "periphery/adc/adc.hpp"
 #include "uavcan/protocol/debug/LogMessage.h"
 
+void movingAverage(float* prev_avg, float crnt_val, uint16_t size) {
+    if (prev_avg != NULL && size != 0) {
+        *prev_avg = (*prev_avg * (size - 1) + crnt_val) / size;
+    }
+}
+
 
 VtolPmu::VtolPmu() {
 
 }
 
 int8_t VtolPmu::init() {
-    _battery_info.current = NAN;
-    _battery_info.voltage = NAN;
-    _battery_info.temperature = NAN;
+    _battery_info.current = 0.0;
+    _battery_info.voltage = 0.0;
+    _battery_info.temperature = 0.0;
     _battery_info.average_power_10sec = 0;
     _battery_info.remaining_capacity_wh = NAN;
     _battery_info.full_charge_capacity_wh = NAN;
@@ -55,7 +61,7 @@ void VtolPmu::_spin_once() {
     _last_spin_time_ms = HAL_GetTick();
 
     float voltage = AdcPeriphery::get(AdcChannel::ADC_VIN) * 19.0 * 3.3 / 4096.0;
-    _battery_info.voltage = voltage;
+    movingAverage(&_battery_info.voltage, voltage, 5);
 
     uint16_t adc_temperature = AdcPeriphery::get(AdcChannel::ADC_TEMPERATURE);
     static const uint16_t TEMP_REF = 25;
@@ -65,7 +71,7 @@ void VtolPmu::_spin_once() {
     _battery_info.temperature = kelvin;
 
     float current = AdcPeriphery::get(AdcChannel::ADC_CRNT) * 600.0 * (3.3 / 3.0 / 4096.0);
-    _battery_info.current = current;
+    movingAverage(&_battery_info.current, current, 50);
 
     dronecan_equipment_battery_info_publish(&_battery_info, &_transfer_id);
     _transfer_id++;
