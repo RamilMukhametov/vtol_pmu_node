@@ -8,9 +8,9 @@
 
 ### 2. Brief hardware info
 
-| View | Pinout |
-| ---- | ------ |
-| <img src="Assets/view.jpg" alt="drawing" width="200"> | pinout |
+| View | STM32CubeMX | Pinout |
+| ---- | ----------- | ------ |
+| <img src="Assets/view.jpg" alt="drawing" width="200"> | <img src="https://github.com/Innopolis-UAV-Team/vtol-pmu-ioc/raw/6530f3319c28916c0268c4aedbf7e330f0dfdd90/Assets/stm32cubemx.png" alt="drawing" width="200"> | pinout |
 
 ### 3. Application interface
 
