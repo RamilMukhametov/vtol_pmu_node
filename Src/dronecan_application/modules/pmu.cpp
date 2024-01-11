@@ -10,6 +10,7 @@
 #include "string_params.hpp"
 #include "storage.h"
 #include "periphery/adc/adc.hpp"
+#include "uavcan/protocol/debug/LogMessage.h"
 
 
 VtolPmu::VtolPmu() {
@@ -26,6 +27,17 @@ int8_t VtolPmu::init() {
     _battery_info.hours_to_full_charge = NAN;
     _battery_info.state_of_health_pct = 0;
     _battery_info.state_of_charge_pct_stdev = 0;
+
+    DebugLogMessage_t msg{};
+    msg.source_size = 2;
+    msg.source[0] = 'h';
+    msg.source[1] = 'i';
+    msg.text[0] = '4';
+    msg.text[1] = '2';
+    msg.text[2] = '.';
+    msg.text_size = 3;
+    uint8_t transfer_id = 0;
+    dronecan_protocol_debug_log_message_publish(&msg, &transfer_id);
 
     return 0;
 }
