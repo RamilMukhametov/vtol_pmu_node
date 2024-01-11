@@ -13,5 +13,5 @@ uint16_t AdcPeriphery::get(AdcChannel channel) {
         return 0;
     }
 
-    return _adc_raw[static_cast<uint8_t>(channel)];
+    return 0;
 }

@@ -27,7 +27,6 @@ public:
     static uint16_t get(AdcChannel channel);
 private:
     static inline bool _is_adc_already_inited = false;
-    static inline uint16_t _adc_raw[static_cast<uint8_t>(AdcChannel::ADC_NUMBER_OF_CNANNELS)];
 };
 
 #ifdef __cplusplus
