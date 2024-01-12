@@ -34,12 +34,12 @@ int8_t VtolPmu::init() {
     msg.source_size = 3;
     msg.source[0] = 'p';
     msg.source[1] = 'm';
-    msg.source[1] = 'u';
+    msg.source[2] = 'u';
     msg.text[0] = 'i';
     msg.text[1] = 'n';
     msg.text[2] = 'i';
     msg.text[3] = 't';
-    msg.text_size = 2;
+    msg.text_size = 4;
     uint8_t transfer_id = 0;
     dronecan_protocol_debug_log_message_publish(&msg, &transfer_id);
 
