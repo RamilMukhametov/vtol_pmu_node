@@ -6,8 +6,6 @@
 #include "dronecan.h"
 #include "main.h"
 #include "params.hpp"
-#include "string_params.hpp"
-#include "string_params.hpp"
 #include "storage.h"
 #include "periphery/adc/adc.hpp"
 #include "uavcan/protocol/debug/LogMessage.h"
