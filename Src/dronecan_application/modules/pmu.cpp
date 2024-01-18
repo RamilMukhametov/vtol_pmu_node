@@ -25,7 +25,8 @@ int8_t VtolPmu::init() {
     _battery_info.remaining_capacity_wh = NAN;
     _battery_info.full_charge_capacity_wh = NAN;
     _battery_info.hours_to_full_charge = 0;
-    _battery_info.state_of_health_pct = 0;
+    _battery_info.state_of_health_pct = 127;
+    _battery_info.state_of_charge_pct = 0;
     _battery_info.state_of_charge_pct_stdev = 0;
 
     DebugLogMessage_t msg{};
@@ -55,6 +56,11 @@ void VtolPmu::process() {
 
 void VtolPmu::_spin_once() {
     _last_spin_time_ms = HAL_GetTick();
+
+    int8_t pmu_soc_pct = paramsGetIntegerValue(PARAM_PMU_SOC_PCT);
+    if (pmu_soc_pct >= 0) {
+        _battery_info.state_of_charge_pct = pmu_soc_pct;
+    }
 
     float voltage = AdcPeriphery::get(AdcChannel::ADC_VIN) * ADC_VOLTAGE_MULTIPLIER;
     _battery_info.voltage = voltage;

@@ -10,6 +10,10 @@
 #include "periphery/adc/adc.hpp"
 #include "modules/pmu.hpp"
 
+static bool isCharacter(uint8_t byte) {
+    return ((byte >= 'a' && byte <= 'z') || (byte >= 'A' && byte <= 'Z'));
+}
+
 void application_entry_point() {
     paramsInit(static_cast<uint8_t>(IntParamsIndexes::INTEGER_PARAMS_AMOUNT), NUM_OF_STR_PARAMS);
     paramsLoadFromFlash();
@@ -21,7 +25,7 @@ void application_entry_point() {
     AdcPeriphery::init();
 
     uavcanInitApplication(node_id);
-    uavcanSetNodeName(node_name);
+    uavcanSetNodeName(isCharacter(node_name[0]) ? node_name : "arl.pmu");
 
     VtolPmu pmu;
     pmu.init();
