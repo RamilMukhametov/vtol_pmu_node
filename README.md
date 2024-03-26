@@ -2,17 +2,13 @@
 
 > Developers docs: [DroneCAN template application](https://github.com/RaccoonlabDev/mini_v2_node/wiki/dronecan).
 
-### 1. Key features
-
-- You can run the software in SITL mode (don't need to have any hardware),
-
-### 2. Brief hardware info
+### 1. Brief hardware info
 
 | View | STM32CubeMX | Pinout |
 | ---- | ----------- | ------ |
 | <img src="Assets/view.jpg" alt="drawing" width="200"> | <img src="https://github.com/Innopolis-UAV-Team/vtol-pmu-ioc/raw/6530f3319c28916c0268c4aedbf7e330f0dfdd90/Assets/stm32cubemx.png" alt="drawing" width="200"> | pinout |
 
-### 3. Application description
+### 2. Application description and software design
 
 The PMU node do 3 things:
 1. Battery. This module measures ADC voltage and current and estimates the battery state.
@@ -44,6 +40,29 @@ The node ignores all broken states first 5 seconds to prevent false positive fai
 3. Buzzer notifies with sound about dead gates or arming state
 
 > arming state will appear later...
+
+### 3. Test Cases
+
+1. TestBatteryInfo
+    - TC1. Publish rate must be 1 Hz (plus minus 50 ms is acceptable)
+    - TC2. Votlage should be within [4.5, 60.0] Volts
+    - TC3. Set a random value between [0, 100] `battery.soc_pct`, so `msg.state_of_charge_pct` should be the same
+    - TC4. The same for `battery.battery_id`
+    - TC5. The same for `battery.model_instance_id`
+    - TC6. Similar for pair `battery.capacity_mah` and `battery.full_voltage`, but check `msg.full_charge_capacity_wh` value according to a formula
+    - TC7. We should also check `msg.remaining_capacity_wh`. Well, it seems to be we should check it manually.
+2. TestBuzzer
+    - I don't know how to automatically test it...
+4. TestGateMonitor
+    - TC1. Reboot the node.
+      Set `gate.threshold` to 0 (that means gates are always ok).
+      Wait for 15 seconds.
+      Debug message should not appear.
+      The NodeStatus should have good health.
+    - TC2. Reboot the node.
+      Set `gate.threshold` to 4095 (that means gates are always bad).
+      Verify, that the node publish LogMessage with 0.1 Hz rate (burst publishing are not allowed, first 5 second node publish nothing)
+      The NodeStatus should have CRITICAL health.
 
 ### 4. How to upload a firmware?
 
