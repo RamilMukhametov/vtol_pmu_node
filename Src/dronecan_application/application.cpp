@@ -32,7 +32,12 @@ void application_entry_point() {
     VtolBattery battery;
     battery.init();
 
+    GateMonitor gate_monitor;
+    gate_monitor.init("PMU");
+
+    ModuleStatus gate_monitor_status = ModuleStatus::MODULE_OK;
     while(true) {
+        gate_monitor_status = gate_monitor.process();
         LedPeriphery::toggle();
         uavcanSpinOnce();
         battery.process();
