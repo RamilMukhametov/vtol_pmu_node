@@ -22,7 +22,7 @@ buzzer.frequency:
   enum: PARAM_BUZZER_FREQUENCY
   flags: mutable
   default: 5
-  min: 0
+  min: 1
   max: 100000
 
 buzzer.duration:

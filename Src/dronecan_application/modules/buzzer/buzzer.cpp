@@ -2,29 +2,35 @@
 // Distributed under the terms of the GPL v3 license, available in the file LICENSE.
 
 #include "buzzer.hpp"
-
-
 #define BEAP_SIZE (6*2 + 11)
+
 
 uint32_t Buzzer::crnt_time_ms = 0;
 Logger Buzzer::logger = Logger("Buzzer");
-uint32_t Buzzer::ttl_current_cmd_ms = 0;
+uint32_t Buzzer::cmd_end_time_ms = 0;
 uint16_t Buzzer::ttl_cmd = 5000;
+BeepCommand_t command = {};
+uint32_t Buzzer::buzzer_frequency = 1;
+uint32_t Buzzer::buzzer_duration = 0;
 
 Buzzer::Buzzer() {
 }
 
 int8_t Buzzer::init() {
-    pwm_pin = PwmPin::PWM_BUZZER;
     PwmPeriphery::init(pwm_pin);
     PwmPeriphery::set_duration(pwm_pin, 0);
+            
+    auto sub_id = uavcanSubscribe(UAVCAN_EQUIPMENT_INDICATION_BEEPCOMMAND_SIGNATURE, UAVCAN_EQUIPMENT_INDICATION_BEEPCOMMAND_ID, callback);
+    if (sub_id < 0) {
+        logger.log_info("subscribe failed");
+        return -1;
+    }
     return 0;
 }
 
 void Buzzer::buzzerSet(uint32_t frequency, uint32_t duration) {
-    if (frequency != PwmPeriphery::get_frequency(pwm_pin)) {
-        PwmPeriphery::set_frequency(pwm_pin, frequency);
-    }
+    if (frequency != PwmPeriphery::get_frequency(pwm_pin))
+    PwmPeriphery::set_frequency(pwm_pin, frequency);
     
     if (duration != PwmPeriphery::get_duration(pwm_pin))
     PwmPeriphery::set_duration(pwm_pin, duration);
@@ -44,21 +50,30 @@ void Buzzer::process(uint8_t curr_error_flag) {
             buzzerSet(error_buzzer_frequency, error_buzzer_duration);
             break;
         case 0:
-            buzzerBeapAnnoying();
+            buzzerBeepAnnoying();
             break;
         case 1:
-            buzzerBeapTolerable();
+            buzzerBeepTolerable();
             break;
         case 2:
-            buzzerBeapBimmer();
+            buzzerBeepBummer();
             break;
         default:
             break;
         }
+
     } else {
-        buzzerSet(buzzer_frequency, (crnt_time_ms > ttl_current_cmd_ms)? buzzer_duration : 0);
+        if (crnt_time_ms < cmd_end_time_ms) {
+            buzzer_duration = command.duration;
+            buzzer_frequency = command.frequency;
+        } else {
+            buzzer_frequency = 1;
+            buzzer_duration = 0;
+        }
+
+        buzzerSet(buzzer_frequency, buzzer_duration);
     }
-    
+
     if (crnt_time_ms > next_upd_ms) {
         update_params();
         next_upd_ms += 200;
@@ -83,25 +98,24 @@ void Buzzer::update_params() {
 }
 
 void Buzzer::callback(CanardRxTransfer* transfer) {
-    BeepCommand_t command;
+    char buffer[255];
     int8_t res = dronecan_equipment_indication_beep_command_deserialize(transfer, &command);
-    if (res > 0) {
-            buzzer_frequency = command.frequency;
-            buzzer_duration = command.duration;
-            ttl_current_cmd_ms = crnt_time_ms + ttl_cmd;
+
+    if (res >= 0) {
+        cmd_end_time_ms = crnt_time_ms + ttl_cmd;
     }
 }
 
-void Buzzer::buzzerBeapAnnoying() {
-    const uint32_t beap_frequency = 2000;
-    bool beap_flag =  (crnt_time_ms % 1000 < 500) ? true : false;
-    buzzerSet(beap_frequency, (beap_flag? beap_frequency / 8 : 0));
+void Buzzer::buzzerBeepAnnoying() {
+    const uint32_t beep_frequency = 2000;
+    bool beep_flag =  (crnt_time_ms % 1000 < 500) ? true : false;
+    buzzerSet(beep_frequency, (beep_flag? beep_frequency / 8 : 0));
 }
 
-void Buzzer::buzzerBeapTolerable() {
-    const uint32_t beap_frequency = 432;
-    bool beap_flag =  (crnt_time_ms % 3000 < 500) ? true : false;
-    buzzerSet(beap_frequency, (beap_flag? beap_frequency / 2 : 0));
+void Buzzer::buzzerBeepTolerable() {
+    const uint32_t beep_frequency = 432;
+    bool beep_flag =  (crnt_time_ms % 3000 < 500) ? true : false;
+    buzzerSet(beep_frequency, (beep_flag? beep_frequency / 2 : 0));
 }
 
 static uint32_t bummer_delay[BEAP_SIZE] = {
@@ -166,7 +180,7 @@ static uint32_t bummer_freq[BEAP_SIZE] = {
   880,
 };
 
-void Buzzer::buzzerBeapBimmer() {
+void Buzzer::buzzerBeepBummer() {
     static uint8_t n_note = 0;
     static uint32_t last_note_start_time_ms = crnt_time_ms;
 
@@ -183,18 +197,20 @@ void Buzzer::buzzerBeapBimmer() {
 }
 
 void Buzzer::publish_command(){
+    char buffer[90];
     static uint32_t next_pub_ms = 100;
     static uint8_t transfer_id = 0;
 
     if (next_pub_ms < crnt_time_ms) {
         next_pub_ms += 10;
 
-        uint16_t frequency = (float) PwmPeriphery::get_frequency(pwm_pin);
-        uint16_t duration = (float) PwmPeriphery::get_duration(pwm_pin);
+        float frequency = PwmPeriphery::get_frequency(pwm_pin);
+        float duration = PwmPeriphery::get_duration(pwm_pin);
 
         BeepCommand_t cmd {};
         cmd.duration = duration;
-        cmd.frequency=frequency;
+        cmd.frequency = frequency;
+
         dronecan_equipment_indication_beep_command_publish(&cmd, &transfer_id);
         transfer_id++;
     }
