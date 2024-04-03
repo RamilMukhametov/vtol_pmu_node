@@ -14,11 +14,12 @@ The node has the following registers:
 |  10 | buzzer.arm_melody       | Melody that is played when the vehicle is armed. Not implemented at the momement. |
 |  11 | buzzer.frequency        | This parameter is applied only if buzzer.melody=127. It means PWM Frequency, Hz. |
 |  12 | buzzer.duration         | This parameter is applied only if buzzer.melody=127. It means PWM duration, us. |
-|  13 | gate.threshold          | If gate ADC less than this parameter, so it is broken.</br>If the node detects a broken gate once, it publishes LogMessage every 10 seconds until reboot.</br><img src="../../Assets/gates.jpg" alt="drawing" width="300">
+|  13 | buzzer.verbose          | Indicates the operational mode of the node. When set to 1, the uavcan.equipment.indication.BeepCommand will be transmitted, including the current Buzzer frequency and duration. |
+|  14 | gate.threshold          | If gate ADC less than this parameter, so it is broken.</br>If the node detects a broken gate once, it publishes LogMessage every 10 seconds until reboot.</br><img src="../../Assets/gates.jpg" alt="drawing" width="300">
  |
-|  14 | gate.status2            | Gate 2 raw ADC value |
-|  15 | gate.status3            | Gate 3 raw ADC value |
-|  16 | gate.status4            | Gate 4 raw ADC value |
+|  15 | gate.status2            | Gate 2 raw ADC value |
+|  16 | gate.status3            | Gate 3 raw ADC value |
+|  17 | gate.status4            | Gate 4 raw ADC value |
 
 > This docs was automatically generated. Do not edit it manually.
 
