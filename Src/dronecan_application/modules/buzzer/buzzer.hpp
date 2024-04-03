@@ -23,16 +23,16 @@ public:
     Buzzer();
     int8_t init();
     void process(uint8_t error_flag);
-    void buzzerSet(uint32_t frequency, uint32_t duration);
+    static void buzzerSet(uint32_t frequency, uint32_t duration);
 
 private:
-    PwmPin pwm_pin;
+    static const PwmPin pwm_pin = PwmPin::PWM_BUZZER;
     static Logger logger;
-    void buzzerBeapBimmer();
-    void buzzerBeapAnnoying();
-    void buzzerBeapTolerable();
+    void buzzerBeepBummer();
+    void buzzerBeepAnnoying();
+    void buzzerBeepTolerable();
     void update_params();
-    void callback(CanardRxTransfer* transfer);
+    static void callback(CanardRxTransfer* transfer);
     void publish_command();
 
     uint8_t error_melody;
@@ -41,12 +41,12 @@ private:
     uint32_t error_buzzer_frequency;
     uint32_t error_buzzer_duration;
 
-    uint32_t buzzer_frequency;
-    uint32_t buzzer_duration = 0;
+    static uint32_t buzzer_frequency;
+    static uint32_t buzzer_duration;
 
     bool verbose;
 
-    static uint32_t ttl_current_cmd_ms;
+    static uint32_t cmd_end_time_ms;
     static uint16_t ttl_cmd;
 
     static uint32_t crnt_time_ms;
