@@ -33,7 +33,8 @@ private:
     void buzzerBeapTolerable();
     void update_params();
     void callback(CanardRxTransfer* transfer);
-    
+    void publish_command();
+
     uint8_t error_melody;
     uint8_t arm_melody;
 
@@ -42,11 +43,14 @@ private:
 
     uint32_t buzzer_frequency;
     uint32_t buzzer_duration;
+
+    bool verbose;
+
     static uint32_t ttl_current_cmd_ms;
     static uint16_t ttl_cmd;
 
     static uint32_t crnt_time_ms;
-    bool error_flag;
+    bool error_flag = false;
 };
 
 #ifdef __cplusplus

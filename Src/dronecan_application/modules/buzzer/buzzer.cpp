@@ -8,8 +8,8 @@
 
 uint32_t Buzzer::crnt_time_ms = 0;
 Logger Buzzer::logger = Logger("Buzzer");
-static uint32_t Buzzer::ttl_current_cmd_ms = 0;
-static uint32_t Buzzer::ttl_cmd = 5000;
+uint32_t Buzzer::ttl_current_cmd_ms = 0;
+uint16_t Buzzer::ttl_cmd = 5000;
 
 Buzzer::Buzzer() {
 }
@@ -35,6 +35,7 @@ void Buzzer::process(uint8_t curr_error_flag) {
     if (crnt_time_ms < 5000) {
         return;
     }
+
     error_flag += curr_error_flag;
     static uint32_t next_upd_ms = 0;
     if (error_flag != 0) {
@@ -55,7 +56,6 @@ void Buzzer::process(uint8_t curr_error_flag) {
             break;
         }
     } else {
-        
         buzzerSet(buzzer_frequency, (crnt_time_ms > ttl_current_cmd_ms)? buzzer_duration : 0);
     }
     
@@ -63,6 +63,11 @@ void Buzzer::process(uint8_t curr_error_flag) {
         update_params();
         next_upd_ms += 200;
     }
+
+    if (verbose) {
+        publish_command();
+    }
+
 }
 
 void Buzzer::update_params() {
@@ -70,6 +75,7 @@ void Buzzer::update_params() {
     arm_melody = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_ARM_MELODY);
     error_buzzer_frequency = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_FREQUENCY);
     error_buzzer_duration = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_DURATION);
+    verbose = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_VERBOSE);
     if (new_error_melody != error_melody){
         logger.log_debug("Melody updated");
         error_melody = new_error_melody;
@@ -173,5 +179,23 @@ void Buzzer::buzzerBeapBimmer() {
     } else {
         n_note = 0;
         buzzerSet(0, 0);
+    }
+}
+
+void Buzzer::publish_command(){
+    static uint32_t next_pub_ms = 100;
+    static uint8_t transfer_id = 0;
+
+    if (next_pub_ms < crnt_time_ms) {
+        next_pub_ms += 10;
+
+        uint16_t frequency = (float) PwmPeriphery::get_frequency(pwm_pin);
+        uint16_t duration = (float) PwmPeriphery::get_duration(pwm_pin);
+
+        BeepCommand_t cmd {};
+        cmd.duration = duration;
+        cmd.frequency=frequency;
+        dronecan_equipment_indication_beep_command_publish(&cmd, &transfer_id);
+        transfer_id++;
     }
 }

@@ -33,3 +33,12 @@ buzzer.duration:
   default: 0
   min: 0
   max: 100000
+
+buzzer.verbose:
+  type: Integer
+  note: Indicates the operational mode of the node. When set to 1, the uavcan.equipment.indication.BeepCommand will be transmitted, including the current Buzzer frequency and duration. 
+  enum: PARAM_BUZZER_VERBOSE
+  flags: mutable
+  default: 0
+  min: 0
+  max: 1
