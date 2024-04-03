@@ -8,6 +8,9 @@
 
 uint32_t Buzzer::crnt_time_ms = 0;
 Logger Buzzer::logger = Logger("Buzzer");
+static uint32_t Buzzer::ttl_current_cmd_ms = 0;
+static uint32_t Buzzer::ttl_cmd = 5000;
+
 Buzzer::Buzzer() {
 }
 
@@ -27,13 +30,17 @@ void Buzzer::buzzerSet(uint32_t frequency, uint32_t duration) {
     PwmPeriphery::set_duration(pwm_pin, duration);
 }
 
-void Buzzer::process(uint8_t error_flag) {
+void Buzzer::process(uint8_t curr_error_flag) {
     crnt_time_ms = HAL_GetTick();
+    if (crnt_time_ms < 5000) {
+        return;
+    }
+    error_flag += curr_error_flag;
     static uint32_t next_upd_ms = 0;
     if (error_flag != 0) {
         switch (error_melody) {
         case 127:
-            buzzerSet(buzzer_frequency, buzzer_duration);
+            buzzerSet(error_buzzer_frequency, error_buzzer_duration);
             break;
         case 0:
             buzzerBeapAnnoying();
@@ -47,7 +54,11 @@ void Buzzer::process(uint8_t error_flag) {
         default:
             break;
         }
+    } else {
+        
+        buzzerSet(buzzer_frequency, (crnt_time_ms > ttl_current_cmd_ms)? buzzer_duration : 0);
     }
+    
     if (crnt_time_ms > next_upd_ms) {
         update_params();
         next_upd_ms += 200;
@@ -57,11 +68,21 @@ void Buzzer::process(uint8_t error_flag) {
 void Buzzer::update_params() {
     auto new_error_melody = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_ERROR_MELODY);
     arm_melody = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_ARM_MELODY);
-    buzzer_frequency = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_FREQUENCY);
-    buzzer_duration = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_DURATION);
+    error_buzzer_frequency = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_FREQUENCY);
+    error_buzzer_duration = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_DURATION);
     if (new_error_melody != error_melody){
         logger.log_debug("Melody updated");
         error_melody = new_error_melody;
+    }
+}
+
+void Buzzer::callback(CanardRxTransfer* transfer) {
+    BeepCommand_t command;
+    int8_t res = dronecan_equipment_indication_beep_command_deserialize(transfer, &command);
+    if (res > 0) {
+            buzzer_frequency = command.frequency;
+            buzzer_duration = command.duration;
+            ttl_current_cmd_ms = crnt_time_ms + ttl_cmd;
     }
 }
 
