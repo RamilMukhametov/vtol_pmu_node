@@ -42,7 +42,7 @@ private:
     uint32_t error_buzzer_duration;
 
     uint32_t buzzer_frequency;
-    uint32_t buzzer_duration;
+    uint32_t buzzer_duration = 0;
 
     bool verbose;
 
