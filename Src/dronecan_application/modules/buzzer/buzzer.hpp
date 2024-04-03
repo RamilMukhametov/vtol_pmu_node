@@ -14,6 +14,8 @@ extern "C" {
 #include "params.hpp"
 #include "storage.h"
 #include "periphery/pwm/pwm.hpp"
+#include "uavcan/equipment/indication/BeepCommand.h"
+
 #include "../../logger.hpp"
 
 class Buzzer {
@@ -30,11 +32,21 @@ private:
     void buzzerBeapAnnoying();
     void buzzerBeapTolerable();
     void update_params();
+    void callback(CanardRxTransfer* transfer);
+    
     uint8_t error_melody;
     uint8_t arm_melody;
+
+    uint32_t error_buzzer_frequency;
+    uint32_t error_buzzer_duration;
+
     uint32_t buzzer_frequency;
     uint32_t buzzer_duration;
+    static uint32_t ttl_current_cmd_ms;
+    static uint16_t ttl_cmd;
+
     static uint32_t crnt_time_ms;
+    bool error_flag;
 };
 
 #ifdef __cplusplus
