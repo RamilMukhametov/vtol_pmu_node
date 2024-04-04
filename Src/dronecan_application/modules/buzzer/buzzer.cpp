@@ -115,13 +115,12 @@ void Buzzer::buzzerBeepTolerable() {
 const uint32_t quarter = 207;
 
 static uint32_t bummer_delay[BEAP_SIZE] = {
-    quarter * 1,
-    quarter * 3,
-    quarter * 4, //pause
-    quarter * 1,
-    quarter * 3,
-    quarter * 4, //pause
-
+    quarter *3/2,
+    quarter * 13 / 2,
+    quarter / 2, //pause
+    quarter *3/2,
+    quarter * 13 / 2,
+    quarter / 2, //pause
     quarter,
     quarter, 
     quarter, 
@@ -132,8 +131,8 @@ static uint32_t bummer_delay[BEAP_SIZE] = {
     quarter, 
 
     quarter, 
-    quarter * 4,
-    quarter * 3
+    quarter * 13 / 2,
+    quarter * 2,
 };
 
 static uint32_t bummer_freq[BEAP_SIZE] = {
