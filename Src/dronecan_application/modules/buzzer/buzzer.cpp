@@ -39,7 +39,7 @@ void Buzzer::process(uint8_t curr_error_flag) {
         return;
     }
 
-    error_flag += curr_error_flag;
+    error_flag = error_flag || curr_error_flag;
     static uint32_t next_upd_ms = 0;
     bool beep_flag = false;
     if (error_flag != 0) {
