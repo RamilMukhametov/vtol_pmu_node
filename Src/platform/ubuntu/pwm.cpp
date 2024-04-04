@@ -16,8 +16,7 @@ void PwmPeriphery::set_duration(const PwmPin pwm_pin, uint32_t duration_us) {
     pwm[(int) pwm_pin] = duration_us;
 }
 
-void PwmPeriphery::set_frequency(const PwmPin pwm_pin, uint32_t frequency_hz) {,
-
+void PwmPeriphery::set_frequency(const PwmPin pwm_pin, uint32_t frequency_hz) {
     pwm_freq[(int) pwm_pin] = frequency_hz;
     pwm_per[(int)pwm_pin] = 1000000 / frequency_hz;
 }

@@ -8,7 +8,6 @@
 uint32_t Buzzer::crnt_time_ms = 0;
 Logger Buzzer::logger = Logger("Buzzer");
 uint32_t Buzzer::cmd_end_time_ms = 0;
-// uint16_t Buzzer::ttl_cmd = 5000;
 BeepCommand_t command = {};
 uint32_t Buzzer::buzzer_frequency = 1;
 uint32_t Buzzer::buzzer_duration = 0;
