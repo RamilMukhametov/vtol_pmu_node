@@ -8,7 +8,7 @@
 uint32_t Buzzer::crnt_time_ms = 0;
 Logger Buzzer::logger = Logger("Buzzer");
 uint32_t Buzzer::cmd_end_time_ms = 0;
-uint16_t Buzzer::ttl_cmd = 5000;
+// uint16_t Buzzer::ttl_cmd = 5000;
 BeepCommand_t command = {};
 uint32_t Buzzer::buzzer_frequency = 1;
 uint32_t Buzzer::buzzer_duration = 0;
@@ -28,12 +28,11 @@ int8_t Buzzer::init() {
     return 0;
 }
 
-void Buzzer::buzzerSet(uint32_t frequency, uint32_t duration) {
+void Buzzer::buzzerSet(uint32_t frequency) {
     if (frequency != PwmPeriphery::get_frequency(pwm_pin))
     PwmPeriphery::set_frequency(pwm_pin, frequency);
-    
-    if (duration != PwmPeriphery::get_duration(pwm_pin))
-    PwmPeriphery::set_duration(pwm_pin, duration);
+    uint32_t arr_ctr = PwmPeriphery::get_frequency(pwm_pin);
+    PwmPeriphery::set_duration(pwm_pin, arr_ctr/2);
 }
 
 void Buzzer::process(uint8_t curr_error_flag) {
@@ -44,10 +43,12 @@ void Buzzer::process(uint8_t curr_error_flag) {
 
     error_flag += curr_error_flag;
     static uint32_t next_upd_ms = 0;
+    bool beep_flag = false;
     if (error_flag != 0) {
         switch (error_melody) {
         case 127:
-            buzzerSet(error_buzzer_frequency, error_buzzer_duration);
+            beep_flag = (crnt_time_ms % error_buzzer_period < error_buzzer_sound_duration) ? true : false;
+            buzzerSet(beep_flag? error_buzzer_frequency : 1);
             break;
         case 0:
             buzzerBeepAnnoying();
@@ -64,14 +65,11 @@ void Buzzer::process(uint8_t curr_error_flag) {
 
     } else {
         if (crnt_time_ms < cmd_end_time_ms) {
-            buzzer_duration = command.duration;
-            buzzer_frequency = command.frequency;
+            buzzerSet(command.frequency);
         } else {
-            buzzer_frequency = 1;
-            buzzer_duration = 0;
+            command.duration = 0;
+            PwmPeriphery::set_duration(pwm_pin,0);
         }
-
-        buzzerSet(buzzer_frequency, buzzer_duration);
     }
 
     if (crnt_time_ms > next_upd_ms) {
@@ -82,19 +80,16 @@ void Buzzer::process(uint8_t curr_error_flag) {
     if (verbose) {
         publish_command();
     }
-
 }
 
 void Buzzer::update_params() {
     auto new_error_melody = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_ERROR_MELODY);
     arm_melody = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_ARM_MELODY);
     error_buzzer_frequency = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_FREQUENCY);
-    error_buzzer_duration = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_DURATION);
     verbose = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_VERBOSE);
-    if (new_error_melody != error_melody){
-        logger.log_debug("Melody updated");
-        error_melody = new_error_melody;
-    }
+    error_buzzer_period = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_BEEP_PERIOD);
+    float beep_fraction = paramsGetIntegerValue(IntParamsIndexes::PARAM_BUZZER_BEEP_FRACTION)/100.0f;
+    error_buzzer_sound_duration = error_buzzer_period * beep_fraction;
 }
 
 void Buzzer::callback(CanardRxTransfer* transfer) {
@@ -102,20 +97,20 @@ void Buzzer::callback(CanardRxTransfer* transfer) {
     int8_t res = dronecan_equipment_indication_beep_command_deserialize(transfer, &command);
 
     if (res >= 0) {
-        cmd_end_time_ms = crnt_time_ms + ttl_cmd;
+        cmd_end_time_ms = crnt_time_ms + command.duration*1000;
     }
 }
 
 void Buzzer::buzzerBeepAnnoying() {
     const uint32_t beep_frequency = 2000;
     bool beep_flag =  (crnt_time_ms % 1000 < 500) ? true : false;
-    buzzerSet(beep_frequency, (beep_flag? beep_frequency / 8 : 0));
+    buzzerSet(beep_flag? beep_frequency : 1);
 }
 
 void Buzzer::buzzerBeepTolerable() {
     const uint32_t beep_frequency = 432;
     bool beep_flag =  (crnt_time_ms % 3000 < 500) ? true : false;
-    buzzerSet(beep_frequency, (beep_flag? beep_frequency / 2 : 0));
+    buzzerSet(beep_flag? beep_frequency : 1);
 }
 
 static uint32_t bummer_delay[BEAP_SIZE] = {
@@ -185,14 +180,14 @@ void Buzzer::buzzerBeepBummer() {
     static uint32_t last_note_start_time_ms = crnt_time_ms;
 
     if (n_note < BEAP_SIZE) {
-        buzzerSet(bummer_freq[n_note], bummer_freq[n_note]/2);
+        buzzerSet(bummer_freq[n_note]);
         if (crnt_time_ms - last_note_start_time_ms > bummer_delay[n_note]) {
             last_note_start_time_ms = crnt_time_ms;
             n_note++;
         } 
     } else {
         n_note = 0;
-        buzzerSet(0, 0);
+        buzzerSet(1);
     }
 }
 
@@ -205,7 +200,7 @@ void Buzzer::publish_command(){
         next_pub_ms += 10;
 
         float frequency = PwmPeriphery::get_frequency(pwm_pin);
-        float duration = PwmPeriphery::get_duration(pwm_pin);
+        float duration = command.duration;
 
         BeepCommand_t cmd {};
         cmd.duration = duration;
