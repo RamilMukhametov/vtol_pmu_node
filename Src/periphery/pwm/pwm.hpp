@@ -26,6 +26,7 @@ public:
     static void set_frequency(const PwmPin pin, uint32_t frequency_hz);
     static uint32_t get_duration(PwmPin pin);
     static uint32_t get_frequency(PwmPin pin);
+    static uint32_t get_period(PwmPin pin);
 };
 
 #ifdef __cplusplus
