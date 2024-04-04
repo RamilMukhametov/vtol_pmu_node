@@ -23,7 +23,7 @@ public:
     Buzzer();
     int8_t init();
     void process(uint8_t error_flag);
-    static void buzzerSet(uint32_t frequency, uint32_t duration);
+    static void buzzerSet(uint32_t frequency);
 
 private:
     static const PwmPin pwm_pin = PwmPin::PWM_BUZZER;
@@ -39,7 +39,8 @@ private:
     uint8_t arm_melody;
 
     uint32_t error_buzzer_frequency;
-    uint32_t error_buzzer_duration;
+    uint32_t error_buzzer_sound_duration;
+    uint32_t error_buzzer_period;
 
     static uint32_t buzzer_frequency;
     static uint32_t buzzer_duration;
@@ -47,7 +48,7 @@ private:
     bool verbose;
 
     static uint32_t cmd_end_time_ms;
-    static uint16_t ttl_cmd;
+    // static uint16_t ttl_cmd;
 
     static uint32_t crnt_time_ms;
     bool error_flag = false;

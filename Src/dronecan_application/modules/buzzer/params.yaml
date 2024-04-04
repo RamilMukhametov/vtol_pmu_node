@@ -25,14 +25,24 @@ buzzer.frequency:
   min: 1
   max: 100000
 
-buzzer.duration:
+buzzer.beep_period:
   type: Integer
-  note: This parameter is applied only if buzzer.melody=127. It means PWM duration, us.
-  enum: PARAM_BUZZER_DURATION
+  note: This parameter is applied only if buzzer.melody=127. It means sound duration in us.
+  enum: PARAM_BUZZER_BEEP_PERIOD
   flags: mutable
   default: 0
   min: 0
   max: 100000
+
+buzzer.beep_fraction:
+  type: Integer
+  note: This parameter is applied only if buzzer.melody=127. It means fraction of bell ringing over beep_period in %.
+  enum: PARAM_BUZZER_BEEP_FRACTION
+  flags: mutable
+  default: 0
+  min: 0
+  max: 100
+
 
 buzzer.verbose:
   type: Integer
