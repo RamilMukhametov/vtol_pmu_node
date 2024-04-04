@@ -2,7 +2,7 @@
 // Distributed under the terms of the GPL v3 license, available in the file LICENSE.
 
 #include "buzzer.hpp"
-#define BEAP_SIZE (6*2 + 11)
+#define BEAP_SIZE (18)
 
 
 uint32_t Buzzer::crnt_time_ms = 0;
@@ -112,48 +112,42 @@ void Buzzer::buzzerBeepTolerable() {
     if (! beep_flag ) PwmPeriphery::set_duration(pwm_pin,0);
 }
 
+const uint32_t quarter = 207;
+
 static uint32_t bummer_delay[BEAP_SIZE] = {
-    207,
-    1241,
-    207,
-    1241,
+    quarter * 1,
+    quarter * 3,
+    quarter * 4, //pause
+    quarter * 1,
+    quarter * 3,
+    quarter * 4, //pause
 
-    207,
-    207, 
-    207, 
-    207, 
+    quarter,
+    quarter, 
+    quarter, 
+    quarter, 
+    quarter, 
+    quarter,
+    quarter, 
+    quarter, 
 
-    207, 
-    207,
-    207, 
-    207, 
-
-    207, 
-    1241,
-    207, 
-    1241,
-
-    207, 
-    1241,
-    207, 
-    207,
-
-    207, 
-    207,
-    207, 
+    quarter, 
+    quarter * 4,
+    quarter * 3
 };
 
 static uint32_t bummer_freq[BEAP_SIZE] = {
   659,
   784,
+  1,
   784,
   659,
+  1,
 
   880,
   784,
   880,
   784,
-
   880,
   784,
   880,
@@ -161,17 +155,7 @@ static uint32_t bummer_freq[BEAP_SIZE] = {
 
   880,
   988,
-  659,
-  784,
-
-  784,
-  659,
-  880,
-  784,
-
-  880,
-  784,
-  880,
+  1
 };
 
 void Buzzer::buzzerBeepBummer() {
@@ -180,6 +164,9 @@ void Buzzer::buzzerBeepBummer() {
 
     if (n_note < BEAP_SIZE) {
         buzzerSet(bummer_freq[n_note]);
+        if (bummer_freq[n_note] == 1) {
+            PwmPeriphery::set_duration(pwm_pin,0);
+        }
         if (crnt_time_ms - last_note_start_time_ms > bummer_delay[n_note]) {
             last_note_start_time_ms = crnt_time_ms;
             n_note++;
