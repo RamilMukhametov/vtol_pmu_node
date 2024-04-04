@@ -48,7 +48,6 @@ private:
     bool verbose;
 
     static uint32_t cmd_end_time_ms;
-    // static uint16_t ttl_cmd;
 
     static uint32_t crnt_time_ms;
     bool error_flag = false;
