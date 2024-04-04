@@ -31,7 +31,7 @@ int8_t Buzzer::init() {
 void Buzzer::buzzerSet(uint32_t frequency) {
     if (frequency != PwmPeriphery::get_frequency(pwm_pin))
     PwmPeriphery::set_frequency(pwm_pin, frequency);
-    uint32_t arr_ctr = PwmPeriphery::get_frequency(pwm_pin);
+    uint32_t arr_ctr = PwmPeriphery::get_period(pwm_pin);
     PwmPeriphery::set_duration(pwm_pin, arr_ctr/2);
 }
 
@@ -64,9 +64,7 @@ void Buzzer::process(uint8_t curr_error_flag) {
         }
 
     } else {
-        if (crnt_time_ms < cmd_end_time_ms) {
-            buzzerSet(command.frequency);
-        } else {
+        if (crnt_time_ms > cmd_end_time_ms) {
             command.duration = 0;
             PwmPeriphery::set_duration(pwm_pin,0);
         }
@@ -93,11 +91,11 @@ void Buzzer::update_params() {
 }
 
 void Buzzer::callback(CanardRxTransfer* transfer) {
-    char buffer[255];
     int8_t res = dronecan_equipment_indication_beep_command_deserialize(transfer, &command);
 
     if (res >= 0) {
-        cmd_end_time_ms = crnt_time_ms + command.duration*1000;
+        buzzerSet(command.frequency);
+        cmd_end_time_ms = transfer->timestamp_usec / 1000 + command.duration*1000;
     }
 }
 

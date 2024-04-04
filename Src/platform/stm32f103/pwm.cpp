@@ -84,3 +84,20 @@ uint32_t PwmPeriphery::get_frequency(PwmPin pwm_pin) {
 
     return pwm_frequency;
 }
+
+
+uint32_t PwmPeriphery::get_period(PwmPin pwm_pin) {
+    uint32_t pwm_period;
+
+    switch (pwm_pin) {
+        case PwmPin::PWM_BUZZER:
+            pwm_period = TIM4->ARR;
+            break;
+
+        default:
+            pwm_period = 0;
+            break;
+    }
+
+    return pwm_period;
+}
