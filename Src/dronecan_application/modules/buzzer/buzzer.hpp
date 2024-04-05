@@ -18,9 +18,17 @@ extern "C" {
 
 #include "../../logger.hpp"
 
+enum class Melody {
+    ANOYING = 0,
+    TOLERABLE = 1,
+    BUMER = 2,
+
+    MANUAL = 127,
+};
+
 class Buzzer {
 public:
-    Buzzer();
+    Buzzer() = default;
     int8_t init();
     void process(uint8_t error_flag);
     static void buzzerSet(uint32_t frequency);
@@ -28,6 +36,7 @@ public:
 private:
     static const PwmPin pwm_pin = PwmPin::PWM_BUZZER;
     static Logger logger;
+    void play_melody();
     void buzzerBeepBummer();
     void buzzerBeepAnnoying();
     void buzzerBeepTolerable();
@@ -35,8 +44,8 @@ private:
     static void callback(CanardRxTransfer* transfer);
     void publish_command();
 
-    uint8_t error_melody;
-    uint8_t arm_melody;
+    Melody error_melody;
+    Melody arm_melody;
 
     uint32_t error_buzzer_frequency;
     uint32_t error_buzzer_sound_duration;
