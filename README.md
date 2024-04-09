@@ -60,28 +60,84 @@ More details you can find in the parameters auto-generated documentation [Src/dr
 
 ### 4. TEST CASES
 
-1. TestBatteryInfo
-    - TC1. Publish rate must be 1 Hz (plus minus 50 ms is acceptable)
-    - TC2. Votlage should be within [4.5, 60.0] Volts
-    - TC3. Set a random value between [0, 100] `battery.soc_pct`, so `msg.state_of_charge_pct` should be the same
-    - TC4. The same for `battery.battery_id`
-    - TC5. The same for `battery.model_instance_id`
-    - TC6. Similar for pair `battery.capacity_mah` and `battery.full_voltage`, but check `msg.full_charge_capacity_wh` value according to a formula
-    - TC7. We should also check `msg.remaining_capacity_wh`. Well, it seems to be we should check it manually.
-2. TestBuzzer
-    - I don't know how to automatically test it...
-4. TestGateMonitor
-    - TC1. Test good gate
-      Reboot the node.
-      Set `gate.threshold` to 4095 (that means gates are always ok).
-      Wait for 15 seconds.
-      Debug message should not appear.
-      The NodeStatus should have good health.
-    - TC2. Test bad gates
-      Reboot the node.
-      Set `gate.threshold` to 0 (that means gates are always bad).
-      Verify, that the node publish LogMessage with 0.1 Hz rate (burst publishing are not allowed, first 5 second node publish nothing)
-      The NodeStatus should have CRITICAL health.
+#### 4.1. TestBatteryInfo
+
+TC1. test_publish_rate
+
+| Description | Publish rate must be 1 Hz. If this test fails, skip all next tests. |
+|-|-|
+| Steps | 1. Obtain 3 `BatteryInfo` messages </br> 2. Compare timestamp differences with 1 sec |
+| Expected result | Timestamp differences is 1 sec, acceptable error is 50 ms |
+
+TC2. test_voltage
+
+| Description | The voltage should be adequate |
+|-|-|
+| Steps | 1. Obtain the voltage value </br> 2. Verify that the voltage is within the specified range |
+| Expected result | The voltage value is within [4.5, 60.0] Volts |
+
+TC3. test_current
+
+| Description | The temperature should be adequate |
+|-|-|
+| Steps | 1. Obtain the current value </br> 2. Verify that the temperature is within the specified range |
+| Expected result | The current value is within [0.0, 200.0] Amperes |
+
+TC4. test_temperature
+
+| Description | The temperature should be adequate |
+|-|-|
+| Steps | 1. Obtain the temperature value </br> 2. Verify that the temperature is within the specified range |
+| Expected result | The temperature value is within [0.0, 200.0] Amperes |
+
+TC5. test_soc_fixed
+
+| Description | PMU has a feature to set a fixed SOC percentage |
+|-|-|
+| Precondition | 1. `battery.soc_pct` is randomly within [0, 100] |
+| Steps | 1. Read `battery.soc_pct` </br> 2. Obtain 1 `BatteryInfo` message </br> 3. Compare `msg.state_of_charge_pct` with `battery.soc_pct` |
+| Expected result | `msg.state_of_charge_pct` matches the random value set for `battery.soc_pct` |
+
+TC6. test_battery_and_instance_id
+
+| Description | Battery and isntance ID are used to diffentiate one battery to another |
+|-|-|
+| Precondition | 1. `battery.battery_id` is random value </br> 2. `battery.model_instance_id` is random value |
+| Steps | 1. Read `battery.battery_id` </br> 2. Read `battery.model_instance_id` </br> 3. Compare read values |
+
+TC7. test_soc_auto
+
+| Description | PMU is able to automatically estimate the remaining battery level |
+|-|-|
+| Precondition | 1. `battery.soc_pct=-1` </br> 2. `battery.empty_voltage_mv=4000` </br> 3. `battery.full_voltage_mv=5000` |
+| Steps | 1. Obtain `BatteryInfo` </br> 2. Check SOC |
+| Expected result | `msg.state_of_charge_pct` should correspond the `msg.voltage` using the formula |
+
+TC8. test_remaining_capacity_wh
+
+| Description | PMU is able to automatically estimate the remaining capacity |
+|-|-|
+| Precondition | 1. `battery.soc_pct=-1` </br> 2. `battery.empty_voltage_mv=4000` </br> 3. `battery.full_voltage_mv=5000` </br> 4. `battery.full_capacity_wh` is random |
+| Steps | 1. Obtain `BatteryInfo` </br> 2. Check `msg.remaining_capacity_wh` |
+| Expected result | `msg.full_capacity_wh` should correspond the `msg.voltage` using the formula |
+
+#### 4.2. TestBuzzer
+
+- I don't know how to automatically test it...
+
+#### 4.3. TestGateMonitor
+
+- TC1. Test good gate
+  Reboot the node.
+  Set `gate.threshold` to 4095 (that means gates are always ok).
+  Wait for 15 seconds.
+  Debug message should not appear.
+  The NodeStatus should have good health.
+- TC2. Test bad gates
+  Reboot the node.
+  Set `gate.threshold` to 0 (that means gates are always bad).
+  Verify, that the node publish LogMessage with 0.1 Hz rate (burst publishing are not allowed, first 5 second node publish nothing)
+  The NodeStatus should have CRITICAL health.
 
 ### 5. CONNECTION
 
