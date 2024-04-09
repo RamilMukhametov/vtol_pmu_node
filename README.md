@@ -10,10 +10,10 @@
 
 ### 2. Application description and software design
 
-The PMU node do 3 things:
-1. Battery. This module measures ADC voltage and current and estimates the battery state.
-2. Gate monitor. This module measures gates voltages and estimates the corectness of the PMU and publishes the LogMessage if error is detected.
-3. Buzzer. This module notifies with sound about such events as dead gates or arming state of the vehicle
+The PMU node does 3 things:
+1. Battery. This module estimates the battery info based on ADC voltage and current measurements and publishes [BatteryInfo](https://dronecan.github.io/Specification/7._List_of_standard_data_types/#batteryinfo) message.
+2. Gate monitor. This module estimates the internal state of the PMU based on ADC voltage of gates. It publishes the [LogMessage](https://dronecan.github.io/Specification/7._List_of_standard_data_types/#logmessage) and set `CRITICAL` state once an error is detected.
+3. Buzzer. This module notifies with sound if the internal state of the board is bad. If the internal state is fine, it repeats the [BeepCommand](https://dronecan.github.io/Specification/7._List_of_standard_data_types/#beepcommand) from an autopilot.
 
 From the software side, the high level node design can be illustrated with the following UML diagramm: 
 
@@ -21,11 +21,22 @@ From the software side, the high level node design can be illustrated with the f
 
 More details about each module:
 
-1. Battery sends [BatteryInfo](https://dronecan.github.io/Specification/7._List_of_standard_data_types/#batteryinfo) message with 1 Hz rate.
+#### 2.1. Battery
+
+The battery module sends [BatteryInfo](https://dronecan.github.io/Specification/7._List_of_standard_data_types/#batteryinfo) message with 1 Hz rate.
 
 <img src="Assets/battery_info.png" alt="drawing">
 
-2. Gate monitor checks the gates
+Here:
+- `voltage` and `current` are measured values,
+- `full_charge_capacity_wh`, `battery_id`, `model_instance_id` are configured via parameters,
+- `average_power_10_sec`, `remaining_capacity_wh`,`state_of_charge_pct` are calculated based on the above values.
+
+#### 2.2. Gate monitor checks the gates
+
+If at least one gate is broken, it starts to notify with LogMessage each 10 seconds until the node is rebooted. The LogMessage has a number of broken gates.
+
+The node ignores all broken states first 5 seconds to prevent false positive failures.
 
 | DMA Rank | Periphery   | Pin  | Meaning        | Note |
 | -------- | ----------- | ---- | -------------- | ---- |
@@ -33,15 +44,19 @@ More details about each module:
 | 3 | ADC_IN4 | PA4 | ADC_GATE_3 | If voltage < 1.4 V, so it is broken. |
 | 4 | ADC_IN6 | PA6 | ADC_GATE_4 | If voltage < 1.4 V, so it is broken. |
 
-If at least one gate is broken, it starts to notify with LogMessage each 10 seconds until the node is rebooted. The LogMessage has a number of broken gates.
+#### 2.3. Buzzer
 
-The node ignores all broken states first 5 seconds to prevent false positive failures.
+The buzzer notifies with sound about dead gates.
 
-3. Buzzer notifies with sound about dead gates or arming state
+### 3. Parameters
 
-> arming state will appear later...
+Here is a list of parameters.
 
-### 3. Test Cases
+<img src="Assets/parameters.png" alt="drawing">
+
+More details you can find in the parameters auto-generated documentation [Src/dronecan_application/README.md](Src/dronecan_application/README.md).
+
+### 4. Test Cases
 
 1. TestBatteryInfo
     - TC1. Publish rate must be 1 Hz (plus minus 50 ms is acceptable)
@@ -66,11 +81,11 @@ The node ignores all broken states first 5 seconds to prevent false positive fai
       Verify, that the node publish LogMessage with 0.1 Hz rate (burst publishing are not allowed, first 5 second node publish nothing)
       The NodeStatus should have CRITICAL health.
 
-### 4. How to upload a firmware?
+### 5. How to upload a firmware?
 
 <img src="Assets/swd.png" alt="drawing" width="400">
 
-### 5. Notes
+### 6. Notes
 
 **Current ADC**
 
