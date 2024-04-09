@@ -83,9 +83,11 @@ More details you can find in the parameters auto-generated documentation [Src/dr
       Verify, that the node publish LogMessage with 0.1 Hz rate (burst publishing are not allowed, first 5 second node publish nothing)
       The NodeStatus should have CRITICAL health.
 
-### 5. HOW TO UPLOAD A FIRMWARE?
+### 5. CONNECTION
 
-<img src="Assets/swd.png" alt="drawing" width="400">
+| SWD connector </br> Upload a firmware | JST GH 4 pin connector </br> CAN-bus bench test |
+|-|-|
+| <img src="Assets/swd.png" alt="drawing"> | <img src="Assets/can.jpg" alt="drawing"> |
 
 ### 6. NOTES
 
